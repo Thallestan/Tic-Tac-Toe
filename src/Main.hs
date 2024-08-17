@@ -13,7 +13,7 @@ import Rendering
 
 -- Define a janela de exibição com título, dimensões e posição na tela.
 window :: Display
-window = InWindow "Functional" (screenWidth, screenHeight) (100, 100)
+window = InWindow "Jogo da Velha" (1900, 1000) (700, -50)
 
 -- Define a cor de fundo da janela como preto.
 backgroundColor :: Color
