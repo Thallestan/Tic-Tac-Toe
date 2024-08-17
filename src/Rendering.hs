@@ -96,7 +96,15 @@ boardAsPicture board =
 
 -- Constrói a imagem do tabuleiro quando o jogo termina.
 boardAsGameOverPicture :: Maybe Player -> Board -> Picture
-boardAsGameOverPicture winner board = color (outcomeColor winner) (boardAsPicture board)
+boardAsGameOverPicture winner board = pictures [color (outcomeColor winner) (boardAsPicture board), color (outcomeColor winner) $
+                         translate (60) (600) $
+                         scale 0.5 0.5 $
+                         text (gameOverText winner)]
+
+-- Define o texto apresentado ao final do jogo
+gameOverText :: Maybe Player -> String
+gameOverText (Just x) = show x ++ " Venceu" 
+gameOverText Nothing = "Deu Velha"
 
 -- Constrói a imagem do jogo com base no estado atual.
 gameAsPicture :: Game -> Picture
