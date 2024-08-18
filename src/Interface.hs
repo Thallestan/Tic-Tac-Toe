@@ -35,7 +35,7 @@ boardAsRunningPicture game =
     pictures [ color playerXColor $ xCellsOfBoard (gameBoard game)
              , color playerOColor $ oCellsOfBoard (gameBoard game)
              , color boardGridColor boardGrid
-             , color boardGridColor $ translate (60) (600) $
+             , color boardGridColor $ translate (fromIntegral screenWidth * (0.5) - 195) (fromIntegral screenHeight + 40) $
                          scale 0.5 0.5 $ text ("Turno do " ++ (show (gamePlayer game)))
              ]
 
@@ -98,7 +98,7 @@ boardAsGameOverPicture winner game =
             pictures [color playerXColor $ xCellsOfBoard (gameBoard game)
              , color playerOColor $ oCellsOfBoard (gameBoard game)
              , color boardGridColor boardGrid
-             , color (outcomeColor winner) $ translate (60) (600) $ scale 0.5 0.5 $ text (gameOverText winner)
+             , color (outcomeColor winner) $ translate (fromIntegral screenWidth * (0.5) - 155) (fromIntegral screenHeight + 40) $ scale 0.5 0.5 $ text (gameOverText winner)
              ]
 
 -- Define o texto apresentado ao final do jogo
@@ -108,9 +108,7 @@ gameOverText Nothing = "Deu Velha!"
 
 -- Constrói a imagem do jogo com base no estado atual.
 gameAsPicture :: Game -> Picture
-gameAsPicture game = 
-            case gameState game of
-                    Running -> translate (fromIntegral screenWidth * (-0.5))
-                               (fromIntegral screenHeight * (-0.5)) $ boardAsRunningPicture game
-                    GameOver winner -> translate (fromIntegral screenWidth * (-0.5))
-                               (fromIntegral screenHeight * (-0.5)) $ boardAsGameOverPicture winner game
+gameAsPicture game = do
+    case gameState game of
+        Running -> translate (fromIntegral screenWidth * (-0.5)) (fromIntegral screenHeight * (-0.5)) $ boardAsRunningPicture game
+        GameOver winner -> translate (fromIntegral screenWidth * (-0.5)) (fromIntegral screenHeight * (-0.5)) $ boardAsGameOverPicture winner game
