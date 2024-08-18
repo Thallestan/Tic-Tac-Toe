@@ -14,6 +14,7 @@ import Graphics.Gloss
 import Game
 import Logic
 import Interface
+import Input (handleEvent)
 
 -- Define a janela de exibição com título, dimensões e posição na tela.
 window :: Display
