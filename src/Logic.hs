@@ -22,8 +22,8 @@ import Game
 
 
 -- Verifica se a coordenada está dentro do intervalo permitido.
-correctCoord :: (Int, Int) -> Bool
-correctCoord = inRange ((0, 0), (boardDimension - 1, boardDimension - 1))
+isCoordValid :: (Int, Int) -> Bool
+isCoordValid = inRange ((0, 0), (boardDimension - 1, boardDimension - 1))
 
 
 -- Alterna o jogador atual no jogo.
@@ -87,7 +87,7 @@ isBoardFull board = countCells Nothing board == 0
 -}
 playerTurn :: Game -> (Int, Int) -> Game
 playerTurn game cellCoord
-    | correctCoord cellCoord && isNothing (board ! cellCoord) =
+    | isCoordValid cellCoord && isNothing (board ! cellCoord) =
         verifyGameState
         $ switchTurn
         $ game { gameBoard = board // [(cellCoord, Just player)] }
