@@ -25,4 +25,4 @@ backgroundColor = makeColor 0 0 0 255
 
 -- Função principal que inicia o jogo.
 main :: IO ()
-main = play window backgroundColor 30 initialGame gameAsPicture transformGame (const id)
+main = play window backgroundColor 30 initialGame gameAsPicture handleEvent (const id)

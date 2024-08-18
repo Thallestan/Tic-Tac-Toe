@@ -2,7 +2,7 @@ module Logic (verifyGameState
   , winner
   , playerTurn
   , mousePosAsCellCoord
-  , transformGame
+  , handleEvent
   ) where
 
 {-
@@ -106,12 +106,12 @@ mousePosAsCellCoord (x, y) = ( floor ((y + (fromIntegral screenHeight * 0.5)) / 
                              )
 
 --Transforma o estado do jogo com base no evento recebido.
-transformGame :: Event -> Game -> Game
-transformGame (EventKey (MouseButton LeftButton) Up _ mousePos) game =
+handleEvent :: Event -> Game -> Game
+handleEvent (EventKey (MouseButton LeftButton) Up _ mousePos) game =
     case gameState game of
       Running -> playerTurn game $ mousePosAsCellCoord mousePos
       GameOver _ -> initialGame
-transformGame _ game = game
+handleEvent _ game = game
 
 
 
