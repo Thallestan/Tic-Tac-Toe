@@ -87,11 +87,12 @@ isBoardFull board = countCells Nothing board == 0
 -}
 playerTurn :: Game -> (Int, Int) -> Game
 playerTurn game cellCoord
-    | isCoordValid cellCoord && isNothing (board ! cellCoord) =
+    | state == Running && isCoordValid cellCoord && isNothing (board ! cellCoord) =
         verifyGameState
         $ switchTurn
         $ game { gameBoard = board // [(cellCoord, Just player)] }
     | otherwise = game
     where board = gameBoard game
           player = gamePlayer game
+          state = gameState game
 

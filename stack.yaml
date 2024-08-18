@@ -1,3 +1,7 @@
 resolver: lts-18.18
 packages:
 - .
+extra-deps:
+- gloss-1.13.2.1
+- gloss-rendering-1.13.1.1
+- random-1.2.1.2

@@ -21,6 +21,7 @@ executable functional
   build-depends:       base >= 4.7 && < 5
                      , array
                      , gloss
+                     , random
   ghc-options:         -Wall
                        -Wcompat
                        -Widentities

@@ -3,10 +3,31 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    hackage: gloss-1.13.2.1@sha256:273d02d30e1896932d45424dab6022a16986c0ed3eef6937776b5f40854ce51c,4075
+    pantry-tree:
+      sha256: 1bcac9962bad9412bfb3c3a694fcdaae7097ee4071b03fc1dc5ab6047baad01b
+      size: 3807
+  original:
+    hackage: gloss-1.13.2.1
+- completed:
+    hackage: gloss-rendering-1.13.1.1@sha256:e7e1e16596a0b30dfc35c8f09685fc0642faefa8729227abaad99bdb2f1ba883,1715
+    pantry-tree:
+      sha256: f16864d3b42b89407dac6d0959601e127147ed2bd3ce8f0cba8a9afbc0b3a2a2
+      size: 895
+  original:
+    hackage: gloss-rendering-1.13.1.1
+- completed:
+    hackage: random-1.2.1.2@sha256:32397de181e20ccaacf806ec70de9308cf044f089a2be37c936f3f8967bde867,6460
+    pantry-tree:
+      sha256: cd0fe2b39e4d4efad4d78f69c28b7fd49ffe2879923b3a9272352edc43a956e6
+      size: 1528
+  original:
+    hackage: random-1.2.1.2
 snapshots:
 - completed:
+    sha256: 63539429076b7ebbab6daa7656cfb079393bf644971156dc349d7c0453694ac2
     size: 586296
     url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/18.yaml
-    sha256: 63539429076b7ebbab6daa7656cfb079393bf644971156dc349d7c0453694ac2
   original: lts-18.18
