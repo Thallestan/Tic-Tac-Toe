@@ -10,8 +10,7 @@ import Data.Array
 import Graphics.Gloss
 
 -- Importa módulos personalizados do jogo.
-import Game
-
+import Game (Game (gameBoard, gamePlayer, gameState), Board, Player (X, O), State (Running, GameOver), Cell, cellWidth, cellHeight, screenWidth, screenHeight, boardDimension)
 
 -- Define a cor da grade do tabuleiro.
 boardGridColor :: Color

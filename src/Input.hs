@@ -1,6 +1,6 @@
 module Input where
 import Game (Game (gameState), State (Running, GameOver), screenHeight, cellHeight, screenWidth, cellWidth, initialGame, boardDimension)
-import Graphics.Gloss.Interface.IO.Game (Event (EventKey), Key (MouseButton, Char), MouseButton (LeftButton), KeyState (Up))
+import Graphics.Gloss.Interface.IO.Game (Event (EventKey), Key (MouseButton), MouseButton (LeftButton), KeyState (Up))
 import Logic (playerTurn)
 import System.Random (randomRIO)
 import Data.List (delete)
