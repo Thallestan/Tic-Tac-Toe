@@ -1,23 +1,11 @@
 module Input where
--- Define o módulo 'Input', que agrupa funções relacionadas à entrada do usuário.
 
 import Game 
--- Importa o módulo 'Game', que contém definições e funções relacionadas ao jogo.
-
 import Graphics.Gloss.Interface.IO.Game (Event (EventKey), Key (MouseButton), MouseButton (LeftButton), KeyState (Up))
--- Importa tipos e funções do módulo 'Graphics.Gloss.Interface.IO.Game' para lidar com eventos de entrada, como cliques do mouse.
-
 import Logic (playerTurn)
--- Importa a função 'playerTurn' do módulo 'Logic', que lida com a lógica de mudança de turno dos jogadores.
-
 import System.Random (randomRIO)
--- Importa a função 'randomRIO' do módulo 'System.Random' para gerar números aleatórios dentro de um intervalo.
-
 import Data.List (delete)
--- Importa a função 'delete' do módulo 'Data.List', que remove o primeiro elemento igual a um valor específico de uma lista.
-
 import Control.Monad.State
--- Importa o módulo 'Control.Monad.State', que fornece a monada 'StateT' para manipulação de estado.
 
 -- Converte a posição do mouse em coordenadas de célula.
 mousePosAsCellCoord :: (Float, Float) -> (Int, Int)
