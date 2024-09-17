@@ -2,31 +2,15 @@
 -- Autores: Thalles Stanziola, Giovana Reis e Henrique Souza
 
 module Main (main) where
--- Define o módulo 'Main', exportando a função 'main'.
 
 import Graphics.Gloss
--- Importa o módulo 'Graphics.Gloss' para renderização gráfica.
-
 import Control.Monad.State
--- Importa o módulo 'Control.Monad.State', que fornece a monada 'State' para manipulação de estado.
-
 import Game
--- Importa o módulo 'Game', que contém definições e funções relacionadas ao jogo.
-
 import Logic
--- Importa o módulo 'Logic', que contém a lógica do jogo.
-
 import Interface
--- Importa o módulo 'Interface', que provavelmente contém funções para a interface do usuário.
-
 import Input (handleEvent, autoSolve)
--- Importa as funções 'handleEvent' e 'autoSolve' do módulo 'Input', que lidam com eventos de entrada e resolução automática do jogo.
-
 import System.Environment (getArgs)
--- Importa a função 'getArgs' do módulo 'System.Environment' para obter argumentos da linha de comando.
-
 import System.Exit (exitFailure)
--- Importa a função 'exitFailure' do módulo 'System.Exit' para encerrar o programa com falha.
 
 window :: Display
 window = InWindow "Jogo da Velha" (850, 768) (700, -50)
