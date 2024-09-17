@@ -1,98 +1,84 @@
-module Logic (verifyGameState
-  , winner
-  , playerTurn
-  ) where
-
-{-
-Import de bibliotecas padrões Haskell
-    Data.Array para manipulação de arrays;
-    função 'asum' da biblioteca Data.Foldable;
-    função 'isNothing' da biblioteca Data.Maybe;
-    interface gráfica do Gloss.
--}
+module Logic (verifyGameState, winner, playerTurn) where
+-- Define o módulo 'Logic', exportando as funções 'verifyGameState', 'winner' e 'playerTurn'.
 
 import Data.Array
+-- Importa o módulo 'Data.Array', que fornece funcionalidades para trabalhar com arrays.
 
 import Data.Foldable (asum)
+-- Importa a função 'asum' do módulo 'Data.Foldable', que retorna o primeiro 'Just' em uma lista de 'Maybe'.
 
 import Data.Maybe (isNothing)
+-- Importa a função 'isNothing' do módulo 'Data.Maybe', que verifica se um valor é 'Nothing'.
 
--- Importa módulos personalizados do jogo.
+import Control.Monad.State
+-- Importa o módulo 'Control.Monad.State', que fornece a monada 'State' para manipulação de estado.
+
 import Game
+-- Importa o módulo 'Game', que contém definições e funções relacionadas ao jogo.
 
+type GameState = State Game
+-- Define um tipo 'GameState' como um estado que manipula o tipo 'Game'.
 
--- Verifica se a coordenada está dentro do intervalo permitido.
 isCoordValid :: (Int, Int) -> Bool
 isCoordValid = inRange ((0, 0), (boardDimension - 1, boardDimension - 1))
+-- A função 'isCoordValid' verifica se uma coordenada está dentro dos limites do tabuleiro.
 
+switchTurn :: GameState ()
+switchTurn = do
+    game <- get
+    let newPlayer = case gamePlayer game of
+                      X -> O
+                      O -> X
+    put game { gamePlayer = newPlayer }
+-- A função 'switchTurn' alterna o jogador atual no estado do jogo.
 
--- Alterna o jogador atual no jogo.
-switchTurn :: Game -> Game
-switchTurn game =
-    case gamePlayer game of
-      X -> game { gamePlayer = O }
-      O -> game { gamePlayer = X }
-
--- Verifica se todas as células em uma lista são iguais e não vazias.
 verifyCells :: [Cell] -> Maybe Player
 verifyCells [] = Nothing
 verifyCells (Just player:cells) =
     foldr (\cell acc -> if cell == Just player then acc else Nothing) (Just player) cells
 verifyCells _ = Nothing
+-- A função 'verifyCells' verifica se todas as células em uma lista são ocupadas pelo mesmo jogador.
+-- Retorna 'Just player' se todas as células são iguais, caso contrário, retorna 'Nothing'.
 
-
-{- 
-Determina o vencedor do jogo verificando linhas, colunas e diagonais.
-Uso da função sum para combinar o resultado do map e validar se existe um vencedor em alguma linha, coluna ou diagonal.
-Retorna o primeiro 'Just Player' que encontrar
--}
 winner :: Board -> Maybe Player
 winner board = asum $ map verifyCells $ rows ++ cols ++ diags
     where rows  = [[board ! (i,j) | i <- [0..boardDimension-1]] | j <- [0..boardDimension-1]]
           cols  = [[board ! (j,i) | i <- [0..boardDimension-1]] | j <- [0..boardDimension-1]]
           diags = [[board ! (i,i) | i <- [0..boardDimension-1]]
                   ,[board ! (i,j) | i <- [0..boardDimension-1], let j = boardDimension-1-i ]]
+-- A função 'winner' verifica se há um vencedor no tabuleiro.
+-- Verifica todas as linhas, colunas e diagonais para ver se todas as células são ocupadas pelo mesmo jogador.
 
--- Conta o número de células específicas no tabuleiro.
 countCells :: Cell -> Board -> Int
 countCells cell = length . filter (cell ==) . elems
+-- A função 'countCells' conta o número de células no tabuleiro que correspondem a um determinado valor.
 
--- Verifica se o jogo terminou e atualiza o estado do jogo.
-verifyGameState :: Game -> Game
-verifyGameState game
-    | Just y <- winner board = game { gameState = GameOver $ Just y }
-    | countCells Nothing board == 0 = game { gameState = GameOver Nothing }
-    | otherwise = game
-    where board = gameBoard game
+verifyGameState :: GameState ()
+verifyGameState = do
+    game <- get
+    let board = gameBoard game
+    let newState = case winner board of
+                     Just y  -> GameOver $ Just y
+                     Nothing -> if countCells Nothing board == 0
+                                then GameOver Nothing
+                                else Running
+    put game { gameState = newState }
+-- A função 'verifyGameState' verifica o estado atual do jogo e atualiza o estado do jogo.
+-- Se houver um vencedor, define o estado como 'GameOver' com o vencedor.
+-- Se todas as células estiverem preenchidas e não houver vencedor, define o estado como 'GameOver' sem vencedor.
+-- Caso contrário, mantém o estado como 'Running'.
 
-{-Implementação inicial da função, trocada pela utilização de Monad   
-verifyGameState :: Game -> Game
-verifyGameState game =
-    case winner board of
-        Just y  -> game { gameState = GameOver $ Just y }
-        Nothing -> if isBoardFull board
-                   then game { gameState = GameOver Nothing }
-                   else game
-  where
-    board = gameBoard game
-
-isBoardFull :: Board -> Bool
-isBoardFull board = countCells Nothing board == 0
--}
-
-
-{- 
-    Realiza a jogada do jogador na coordenada especificada.
-    Caso o jogador clique fora da grade ou em uma célula preenchida nada acontece
--}
-playerTurn :: Game -> (Int, Int) -> Game
-playerTurn game cellCoord
-    | state == Running && isCoordValid cellCoord && isNothing (board ! cellCoord) =
+playerTurn :: (Int, Int) -> GameState ()
+playerTurn cellCoord = do
+    game <- get
+    let board = gameBoard game
+    let player = gamePlayer game
+    let state = gameState game
+    when (state == Running && isCoordValid cellCoord && isNothing (board ! cellCoord)) $ do
+        let newBoard = board // [(cellCoord, Just player)]
+        put game { gameBoard = newBoard }
+        switchTurn
         verifyGameState
-        $ switchTurn
-        $ game { gameBoard = board // [(cellCoord, Just player)] }
-    | otherwise = game
-    where board = gameBoard game
-          player = gamePlayer game
-          state = gameState game
-
+-- A função 'playerTurn' realiza a jogada de um jogador em uma coordenada específica.
+-- Verifica se o jogo está em andamento, se a coordenada é válida e se a célula está vazia.
+-- Atualiza o tabuleiro com a jogada do jogador, alterna o turno e verifica o estado do jogo.
