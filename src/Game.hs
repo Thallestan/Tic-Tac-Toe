@@ -1,53 +1,56 @@
 module Game where
 
--- Importa a biblioteca Data.Array para manipulação de arrays.
 import Data.Array
 
--- Define o tipo Player com dois valores possíveis: X e O.
 data Player = X | O deriving (Eq, Show)
+-- Define um tipo de dado 'Player' que pode ser 'X' ou 'O'.
+-- A derivação 'Eq' permite comparar jogadores, e 'Show' permite exibir jogadores como strings.
 
--- Define o tipo Cell como um Maybe Player, que pode ser Nothing ou Just Player.
 type Cell = Maybe Player
+-- Define 'Cell' como um tipo que pode ser 'Nothing' (célula vazia) ou 'Just Player' (célula ocupada por um jogador).
 
--- Define o tipo State com dois valores possíveis: Running e GameOver (com um Maybe Player).
-data State = Running | GameOver (Maybe Player) deriving (Eq, Show)
+data Estado = Running | GameOver (Maybe Player) deriving (Eq, Show)
+-- Define um tipo de dado 'Estado' que pode ser 'Running' (jogo em andamento) ou 'GameOver (Maybe Player)' (jogo terminado, com um possível vencedor).
+-- A derivação 'Eq' permite comparar estados, e 'Show' permite exibir estados como strings.
 
--- Define o tipo Board como um array de células indexado por tuplas de inteiros.
 type Board = Array (Int, Int) Cell
+-- Define 'Board' como um array bidimensional de células ('Cell'), indexado por tuplas de inteiros.
 
--- Define o tipo Game com três campos: gameBoard, gamePlayer e gameState.
 data Game = Game { gameBoard :: Board
                  , gamePlayer :: Player
-                 , gameState :: State
+                 , gameState :: Estado
                  } deriving (Eq, Show)
+-- Define um tipo de dado 'Game' que contém o tabuleiro ('gameBoard'), o jogador atual ('gamePlayer') e o estado do jogo ('gameState').
+-- A derivação 'Eq' permite comparar jogos, e 'Show' permite exibir jogos como strings.
 
-{-
-    Define a dimensão do tabuleiro. 
-    Definida em forma de variável para facilitar leitura do código e também auxiliar na 2º parte da entrega
--}
 boardDimension :: Int
 boardDimension = 3
+-- Define a dimensão do tabuleiro como 3 (um tabuleiro 3x3).
 
--- Define a largura da tela.
 screenWidth :: Int
 screenWidth = 640
+-- Define a largura da tela como 640 pixels.
 
--- Define a altura da tela.
 screenHeight :: Int
 screenHeight = 480
+-- Define a altura da tela como 480 pixels.
 
--- Calcula a largura de cada célula com base na largura da tela e na dimensão do tabuleiro.
 cellWidth :: Float
 cellWidth = fromIntegral screenWidth / fromIntegral boardDimension
+-- Calcula a largura de cada célula do tabuleiro, convertendo 'screenWidth' e 'boardDimension' para 'Float' e dividindo-os.
 
--- Calcula a altura de cada célula com base na altura da tela e na dimensão do tabuleiro.
 cellHeight :: Float
 cellHeight = fromIntegral screenHeight / fromIntegral boardDimension
+-- Calcula a altura de cada célula do tabuleiro, convertendo 'screenHeight' e 'boardDimension' para 'Float' e dividindo-os.
 
--- Inicializa o jogo com um tabuleiro vazio, X como jogador inicial e estado Running.
 initialGame :: Game
 initialGame = Game { gameBoard = array indexRange $ zip (range indexRange) (repeat Nothing)
                    , gamePlayer = X
                    , gameState = Running
                    }
     where indexRange = ((0, 0), (boardDimension - 1, boardDimension - 1))
+-- Define o estado inicial do jogo ('initialGame'):
+-- 'gameBoard': Cria um array de células vazias ('Nothing') com índices de '(0, 0)' a '(2, 2)'.
+-- 'gamePlayer': Define o jogador inicial como 'X'.
+-- 'gameState': Define o estado inicial do jogo como 'Running'.
+-- 'indexRange': Define o intervalo de índices do tabuleiro.
