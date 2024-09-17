@@ -1,7 +1,7 @@
 cabal-version:       2.2
 
 name:                TIC-TAC-TOE
-version:             2.0
+version:             2.1
 homepage:            
 license:             NONE
 license-file:        LICENSE
