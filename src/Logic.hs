@@ -1,20 +1,10 @@
 module Logic (verifyGameState, winner, playerTurn) where
--- Define o módulo 'Logic', exportando as funções 'verifyGameState', 'winner' e 'playerTurn'.
 
 import Data.Array
--- Importa o módulo 'Data.Array', que fornece funcionalidades para trabalhar com arrays.
-
 import Data.Foldable (asum)
--- Importa a função 'asum' do módulo 'Data.Foldable', que retorna o primeiro 'Just' em uma lista de 'Maybe'.
-
 import Data.Maybe (isNothing)
--- Importa a função 'isNothing' do módulo 'Data.Maybe', que verifica se um valor é 'Nothing'.
-
 import Control.Monad.State
--- Importa o módulo 'Control.Monad.State', que fornece a monada 'State' para manipulação de estado.
-
 import Game
--- Importa o módulo 'Game', que contém definições e funções relacionadas ao jogo.
 
 type GameState = State Game
 -- Define um tipo 'GameState' como um estado que manipula o tipo 'Game'.
