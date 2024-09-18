@@ -10,7 +10,7 @@ import Data.Array
 import Graphics.Gloss
 
 -- Importa módulos personalizados do jogo.
-import Game (Game (gameBoard, gamePlayer, gameState), Board, Player (X, O), State (Running, GameOver), Cell, cellWidth, cellHeight, screenWidth, screenHeight, boardDimension)
+import Game (Game (gameBoard, gamePlayer, gameState), Board, Player (X, O), Estado (Running, GameOver), Cell, cellWidth, cellHeight, screenWidth, screenHeight, boardDimension)
 
 -- Define a cor da grade do tabuleiro.
 boardGridColor :: Color
@@ -39,10 +39,13 @@ boardAsRunningPicture game =
              ]
 
 -- Define a cor do resultado do jogo com base no vencedor.
+-- Aqui utilizamos a função maybe pré existente no prelude haskell que funciona de forma semelhante ao fmap do tipo Maybe
 outcomeColor :: Maybe Player -> Color
-outcomeColor (Just X) = playerXColor
-outcomeColor (Just O) = playerOColor
-outcomeColor Nothing = tieColor
+outcomeColor = maybe tieColor playerColor
+  where
+    playerColor X = playerXColor
+    playerColor O = playerOColor
+
 
 -- Ajusta a imagem para a célula especificada.
 snapPictureToCell :: (Integral a, Integral b) => Picture -> (a, b) -> Picture

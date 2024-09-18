@@ -24,10 +24,13 @@ switchTurn = do
 
 verifyCells :: [Cell] -> Maybe Player
 verifyCells [] = Nothing
-verifyCells (Just player:cells) =
-    foldr (\cell acc -> if cell == Just player then acc else Nothing) (Just player) cells
+verifyCells (Just player:cells) = do
+    _ <- foldM (\acc cell -> if cell == Just player then Just player else Nothing) player cells
+    return player
 verifyCells _ = Nothing
--- A função 'verifyCells' verifica se todas as células em uma lista são ocupadas pelo mesmo jogador.
+
+-- A função 'verifyCells' verifica se todas as células em uma lista são ocupadas pelo mesmo jogador,
+-- utilizando a propriedade de mônada do tipo Maybe.
 -- Retorna 'Just player' se todas as células são iguais, caso contrário, retorna 'Nothing'.
 
 winner :: Board -> Maybe Player
