@@ -1,6 +1,6 @@
 module Game where
 
-import Data.Array
+import Data.Matrix
 
 data Player = X | O deriving (Eq, Show)
 -- Define um tipo de dado 'Player' que pode ser 'X' ou 'O'.
@@ -13,8 +13,18 @@ data Estado = Running | GameOver (Maybe Player) deriving (Eq, Show)
 -- Define um tipo de dado 'Estado' que pode ser 'Running' (jogo em andamento) ou 'GameOver (Maybe Player)' (jogo terminado, com um possível vencedor).
 -- A derivação 'Eq' permite comparar estados, e 'Show' permite exibir estados como strings.
 
-type Board = Array (Int, Int) Cell
--- Define 'Board' como um array bidimensional de células ('Cell'), indexado por tuplas de inteiros.
+data Tree a = Node (Matrix (Tree a)) | Leaf a
+    deriving (Show, Eq)
+
+treeDepth :: Tree (Matrix a) -> Int
+treeDepth (Leaf _) = 0
+treeDepth (Node n) = 1 + maximum (treeDepth <$> toList n)
+
+instance Functor Tree where
+    fmap f (Leaf l) = Leaf (f l)
+    fmap f (Node n) = Node (fmap (fmap f) n)
+
+type Board = Tree (Matrix Cell)
 
 data Game = Game { gameBoard :: Board
                  , gamePlayer :: Player
@@ -43,14 +53,19 @@ cellHeight :: Float
 cellHeight = fromIntegral screenHeight / fromIntegral boardDimension
 -- Calcula a altura de cada célula do tabuleiro, convertendo 'screenHeight' e 'boardDimension' para 'Float' e dividindo-os.
 
-initialGame :: Game
-initialGame = Game { gameBoard = array indexRange $ zip (range indexRange) (repeat Nothing)
+indexRange :: ((Int, Int), (Int, Int))
+indexRange = ((0, 0), (boardDimension - 1, boardDimension - 1))
+
+emptyBoard :: Int -> Board
+emptyBoard 1 = Leaf $ matrix boardDimension boardDimension $ const Nothing
+emptyBoard depth = Node $ matrix boardDimension boardDimension $ const (emptyBoard (depth - 1))
+
+setNodeElem :: Tree (Matrix Cell) -> (Int, Int) -> Board -> Board
+setNodeElem e pos (Node n) = Node $ setElem e pos n
+setNodeElem _ _ board = board
+
+initialGame :: Int -> Game
+initialGame depth = Game { gameBoard = emptyBoard depth
                    , gamePlayer = X
                    , gameState = Running
                    }
-    where indexRange = ((0, 0), (boardDimension - 1, boardDimension - 1))
--- Define o estado inicial do jogo ('initialGame'):
--- 'gameBoard': Cria um array de células vazias ('Nothing') com índices de '(0, 0)' a '(2, 2)'.
--- 'gamePlayer': Define o jogador inicial como 'X'.
--- 'gameState': Define o estado inicial do jogo como 'Running'.
--- 'indexRange': Define o intervalo de índices do tabuleiro.

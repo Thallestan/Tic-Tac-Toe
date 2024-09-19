@@ -6,11 +6,13 @@ Import de bibliotecas padrões Haskell
     Graphics.Gloss para renderização gráfica.
 -}
 
-import Data.Array
 import Graphics.Gloss
 
 -- Importa módulos personalizados do jogo.
-import Game (Game (gameBoard, gamePlayer, gameState), Board, Player (X, O), Estado (Running, GameOver), Cell, cellWidth, cellHeight, screenWidth, screenHeight, boardDimension)
+import Data.Maybe (catMaybes, maybeToList)
+import Data.Matrix (toList, mapPos)
+import Logic (winner)
+import Game
 
 -- Define a cor da grade do tabuleiro.
 boardGridColor :: Color
@@ -28,15 +30,43 @@ playerOColor = makeColorI 50 100 255 255
 tieColor :: Color
 tieColor = greyN 0.5
 
+boardToPicture :: Board -> Picture
+boardToPicture board = pictures [
+    boardGrid board,
+    pictures $ playersPlacements board
+  ]
+
+playersPlacements :: Board -> [Picture]
+playersPlacements = go
+  where go :: Board -> [Picture]
+        go (Leaf l) = [
+            pictures $ catMaybes $ toList $ mapPos (
+                \(i, j) cell -> do
+                    c <- cell
+                    Just $ translate
+                        ((fromIntegral (i - 1) * cellWidth) + (cellWidth / 2))
+                        ((fromIntegral (j - 1) * cellHeight) + (cellHeight / 2))
+                      $ playerPicture c
+            ) l]
+        go (Node n) = [pictures $ toList $ mapPos (
+                \(i, j) b ->
+                    translate (fromIntegral (i - 1) * cellWidth) (fromIntegral (j - 1) * cellHeight) $
+                    pictures (
+                        scale (1 / 3) (1 / 3) (pictures $ go b) :
+                        maybeToList (fmap (translate (cellWidth / 2) (cellHeight / 2) . playerPicture) (winner b))
+                    )
+                ) n]
+
+playerPicture :: Player -> Picture
+playerPicture X = xPicture
+playerPicture O = oPicture
+
 -- Constrói a imagem do tabuleiro durante o jogo.
 boardAsRunningPicture :: Game -> Picture
 boardAsRunningPicture game =
-    pictures [ color playerXColor $ xCellsOfBoard (gameBoard game)
-             , color playerOColor $ oCellsOfBoard (gameBoard game)
-             , color boardGridColor boardGrid
-             , color boardGridColor $ translate (fromIntegral screenWidth * (0.5) - 195) (fromIntegral screenHeight + 40) $
-                         scale 0.5 0.5 $ text ("Turno do " ++ (show (gamePlayer game)))
-             ]
+    pictures [boardToPicture board]
+    where board = gameBoard game
+          player = gamePlayer game
 
 -- Define a cor do resultado do jogo com base no vencedor.
 -- Aqui utilizamos a função maybe pré existente no prelude haskell que funciona de forma semelhante ao fmap do tipo Maybe
@@ -47,65 +77,58 @@ outcomeColor = maybe tieColor playerColor
     playerColor O = playerOColor
 
 
--- Ajusta a imagem para a célula especificada.
-snapPictureToCell :: (Integral a, Integral b) => Picture -> (a, b) -> Picture
-snapPictureToCell picture (row, column) = translate x y picture
-    where x = fromIntegral column * cellWidth + cellWidth * 0.5
-          y = fromIntegral row * cellHeight + cellHeight * 0.5
+xPictureSide :: Float
+xPictureSide = min cellWidth cellHeight * 0.75
 
--- Define a imagem da célula X. COnstruída a partir de retângulos sobrepostos.
-xCell :: Picture
-xCell = pictures [ rotate 45.0 $ rectangleSolid side 10.0
-                 , rotate (-45.0) $ rectangleSolid side 10.0
-                 ]
-    where side = min cellWidth cellHeight * 0.75
+-- Define a imagem da célula X. Construída a partir de retângulos sobrepostos.
+xPicture :: Picture
+xPicture = color playerXColor $ pictures
+    [
+        rotate 45.0 $ rectangleSolid xPictureSide 20.0,
+        rotate (-45.0) $ rectangleSolid xPictureSide 20.0
+    ]
 
 -- Define a imagem da célula O. Construída com a função de criação de círculos.
-oCell :: Picture
-oCell = thickCircle radius 10.0
+oPicture :: Picture
+oPicture = color playerOColor $ thickCircle radius 20.0
     where radius = min cellWidth cellHeight * 0.25
 
--- Constrói a imagem das células do tabuleiro.
-cellsOfBoard :: Board -> Cell -> Picture -> Picture
-cellsOfBoard board cell cellPicture =
-    pictures
-    $ map (snapPictureToCell cellPicture . fst)
-    $ filter (\(_, e) -> e == cell)
-    $ assocs board
-
--- Constrói a imagem das células X do tabuleiro.
-xCellsOfBoard :: Board -> Picture
-xCellsOfBoard board = cellsOfBoard board (Just X) xCell
-
--- Constrói a imagem das células O do tabuleiro.
-oCellsOfBoard :: Board -> Picture
-oCellsOfBoard board = cellsOfBoard board (Just O) oCell
-
 -- Constrói a grade do tabuleiro.
-boardGrid :: Picture
-boardGrid =
-    pictures
-    $ concatMap (\i -> [ line [ (i * cellWidth, 0.0)
-                              , (i * cellWidth, fromIntegral screenHeight)
-                              ]
-                       , line [ (0.0,                      i * cellHeight)
-                              , (fromIntegral screenWidth, i * cellHeight)
-                              ]
-                       ])
-      [0.0 .. fromIntegral boardDimension]
+boardGrid :: Board -> Picture
+boardGrid board =
+    color boardGridColor $ pictures $ go board
+      where go :: Board -> [Picture]
+            go (Leaf _) = [
+                pictures $ concatMap (\li -> [
+                    line [(li * cellWidth, 0.0), (li * cellWidth, fromIntegral screenHeight)],
+                    line [(0.0, li * cellHeight), (fromIntegral screenWidth, li * cellHeight)]
+                ]) [1.0 .. fromIntegral boardDimension - 1]]
+            go (Node n) = [
+                    pictures $ concatMap (\li -> [
+                        translate (fromIntegral screenWidth / 2) (li * cellHeight) $ rectangleSolid (fromIntegral screenWidth) 8.0,
+                        translate (li * cellWidth) (fromIntegral screenHeight / 2) $ rectangleSolid 8.0 (fromIntegral screenHeight)
+                    ]) [1.0 .. fromIntegral boardDimension - 1] ++ [
+                        pictures $
+                        toList $
+                        mapPos (
+                            \(i, j) b ->
+                                translate (fromIntegral (i - 1) * cellWidth) (fromIntegral (j - 1) * cellHeight) $
+                                scale (1 / 3) (1 / 3) $
+                                pictures $
+                                go b
+                        ) n
+                    ]
+                ]
 
 -- Constrói a imagem do tabuleiro quando o jogo termina.
 boardAsGameOverPicture :: Maybe Player -> Game -> Picture
-boardAsGameOverPicture winner game = 
-            pictures [color playerXColor $ xCellsOfBoard (gameBoard game)
-             , color playerOColor $ oCellsOfBoard (gameBoard game)
-             , color boardGridColor boardGrid
-             , color (outcomeColor winner) $ translate (fromIntegral screenWidth * (0.5) - 155) (fromIntegral screenHeight + 40) $ scale 0.5 0.5 $ text (gameOverText winner)
-             ]
+boardAsGameOverPicture theWinner game =
+    pictures $ boardToPicture board : [color (outcomeColor theWinner) $ translate (fromIntegral screenWidth * 0.5 - 155) (fromIntegral screenHeight + 40) $ scale 0.5 0.5 $ text (gameOverText theWinner)]
+    where board = gameBoard game
 
 -- Define o texto apresentado ao final do jogo
 gameOverText :: Maybe Player -> String
-gameOverText (Just y) = show y ++ " Venceu" 
+gameOverText (Just y) = show y ++ " Venceu"
 gameOverText Nothing = "Deu Velha!"
 
 -- Constrói a imagem do jogo com base no estado atual.
@@ -113,4 +136,5 @@ gameAsPicture :: Game -> Picture
 gameAsPicture game = do
     case gameState game of
         Running -> translate (fromIntegral screenWidth * (-0.5)) (fromIntegral screenHeight * (-0.5)) $ boardAsRunningPicture game
-        GameOver winner -> translate (fromIntegral screenWidth * (-0.5)) (fromIntegral screenHeight * (-0.5)) $ boardAsGameOverPicture winner game
+        GameOver theWinner -> translate (fromIntegral screenWidth * (-0.5)) (fromIntegral screenHeight * (-0.5)) $ boardAsGameOverPicture theWinner game
+
